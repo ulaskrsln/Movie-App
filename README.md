@@ -108,6 +108,6 @@ Bu projenin temel amaçları şunlardır:
 ## irtibat
 
 *   **Geliştirici:** Ulaş Karaaslan
-*   **GitHub:** [[GitHub Profil Linkiniz]](https://github.com/ulaskrsln)
+*   **GitHub:** [[GitHub Profil]](https://github.com/ulaskrsln)
 *   **E-posta:** ulas.karaaslan@icloud.com
 
