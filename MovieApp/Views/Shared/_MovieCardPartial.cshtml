@@ -1,0 +1,33 @@
+﻿@model MovieApp.Models.MovieResult
+
+<div class="card h-100 shadow-sm movie-card"> 
+    <a asp-controller="Movies" asp-action="Details" asp-route-id="@Model.Id" title="@Model.Title Detayları">
+        @if (!string.IsNullOrEmpty(Model.FullPosterPath)) 
+        {
+                <img src="@Model.FullPosterPath" class="card-img-top" alt="@Model.Title" style="aspect-ratio: 2 / 3; object-fit: cover;">
+        }
+        @* Eğer helper YOKSA:
+        @if (!string.IsNullOrEmpty(Model.PosterPath))
+        {
+            <img src="@($"https://image.tmdb.org/t/p/w500{Model.PosterPath}")" class="card-img-top" alt="@Model.Title" style="aspect-ratio: 2 / 3; object-fit: cover;">
+        }
+        *@
+        else
+        {
+                <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-secondary" style="aspect-ratio: 2 / 3;">
+                    <i class="bi bi-film fs-1"></i>
+                </div>
+        }
+    </a>
+    <div class="card-body pb-2 d-flex flex-column">
+        <h5 class="card-title fs-6 fw-bold">
+            <a asp-controller="Movies" asp-action="Details" asp-route-id="@Model.Id" class="text-dark text-decoration-none stretched-link" title="@Model.Title">
+                @Model.Title
+            </a>
+            <span class="text-muted fw-normal">(@Model.ReleaseYear)</span>
+        </h5>
+        <small class="text-muted mt-auto pt-1">
+            <i class="bi bi-star-fill text-warning"></i> @Model.VoteAverage.ToString("0.0")/10
+        </small>
+    </div>
+</div>

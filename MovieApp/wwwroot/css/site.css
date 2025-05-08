@@ -1,0 +1,53 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+    background-color: #E0F7FA;
+}
+
+header {
+
+    background-color: #16325C;
+    color: white;
+   
+}
+
+.navbar .navbar-brand {
+    background-color: #FFFFFF; 
+    color: #16325C;
+    padding: 0.4rem 1rem;
+    border-radius: 8px;/
+    display: inline-flex;
+    align-items: center;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+    .navbar .navbar-brand:hover,
+    .navbar .navbar-brand:focus { 
+        color: #16325C; 
+        background-color: #f2f2f2; 
+        text-decoration: none;
+        outline: none; 
+    }
+    .navbar .navbar-brand i {
+        color: inherit;
+    }
+
+

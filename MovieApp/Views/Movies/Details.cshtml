@@ -1,0 +1,288 @@
+﻿@model MovieApp.Models.MovieDetailViewModel
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    ViewData["Title"] = Model.Movie.Title ?? "Film Detayı";
+}
+
+<div class="container mt-4 movie-details">
+
+    <div class="row">
+        <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
+            @if (!string.IsNullOrEmpty(Model.Movie.FullPosterPath))
+            {
+                <img src="@Model.Movie.FullPosterPath" class="img-fluid rounded shadow-lg" alt="@Model.Movie.Title Afişi">
+            }
+            else
+            {
+                <div class="img-fluid rounded shadow-lg d-flex align-items-center justify-content-center bg-light text-secondary" style="min-height: 450px;">
+                    <i class="bi bi-image-alt fs-1"></i> <span class="ms-2">Afiş Bulunamadı</span>
+                </div>
+            }
+        </div>
+
+        <div class="col-md-8">
+            <h1 class="display-5 fw-bold">@Model.Movie.Title</h1>
+            <h4 class="text-muted fw-light mb-3">(@Model.Movie.ReleaseYear)</h4>
+
+            <div class="ms-3">
+                @if (SignInManager.IsSignedIn(User)) 
+                {
+                    <form method="post" id="favoriteForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="movieId" value="@Model.Movie.Id" />
+
+                        @if (Model.IsFavorited) // Film zaten favorilerde ise
+                        {
+                            <button type="submit" asp-controller="Favorites" asp-action="Remove"
+                                    class="btn btn-danger favorite-button"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Favorilerden Çıkar">
+                                <i class="bi bi-heart-fill"></i> 
+                                <span class="button-text d-none d-md-inline">Favorilerimde</span> 
+                            </button>
+                        }
+                        else // Film favorilerde değilse
+                        {
+                            <button type="submit" asp-controller="Favorites" asp-action="Add"
+                                    class="btn btn-outline-danger favorite-button" 
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Favorilere Ekle">
+                                <i class="bi bi-heart"></i>
+                                <span class="button-text d-none d-md-inline">Favorilere Ekle</span>
+                            </button>
+                        }
+                    </form>
+                }
+                else // Kullanıcı giriş yapmamışsa
+                {
+                    <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path"
+                       class="btn btn-outline-secondary btn-sm" title="Giriş Yap">
+                        <i class="bi bi-heart"></i> Favorilere eklemek için giriş yapın
+                    </a>
+                }
+            </div>
+
+            <div class="mb-3">
+                <strong class="d-block text-primary mb-2"><i class="bi bi-tags-fill me-1"></i> Türler:</strong>
+                @if (Model.Movie.Genres.Any())
+                {
+                    foreach (var genre in Model.Movie.Genres)
+                    {
+                        @* Her türü link olarak göster *@
+                        <a asp-controller="Genres" asp-action="MoviesByGenre" asp-route-id="@genre.Id" asp-route-name="@genre.Name"
+                           class="badge bg-secondary text-decoration-none link-light me-1 mb-1 p-2">
+                            @* Bootstrap badge stili *@
+                            @genre.Name
+                        </a>
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">Tür bilgisi yok.</span>
+                }
+            </div>
+
+
+            <hr>
+            <div class="row mb-3 align-items-center">
+                <div class="col-sm-6 mb-2 mb-sm-0">
+                    <strong class="d-block text-primary mb-1"><i class="bi bi-star-fill text-warning me-1"></i> Puan:</strong>
+                    <span class="fs-5">@Model.Movie.FormattedVoteAverage</span><span class="text-muted">/10</span>
+                    <small class="d-block text-muted">(@Model.Movie.VoteCount.ToString("N0") oy)</small>
+                </div>
+                <div class="col-sm-6">
+                    <strong class="d-block text-primary mb-1"><i class="bi bi-calendar3 me-1"></i> Vizyon Tarihi:</strong>
+                </div>
+            </div>
+            <div class="mb-3">
+                <strong class="d-block text-primary"><i class="bi bi-person-video me-1"></i> Yönetmen:</strong>
+                @if (Model.Movie.DirectorId.HasValue && !string.IsNullOrEmpty(Model.Movie.DirectorName) && Model.Movie.DirectorName != "Bilinmiyor")
+                {
+                    <a asp-controller="People" asp-action="Details" asp-route-id="@Model.Movie.DirectorId" class="text-decoration-none text-dark fw-medium">
+                        @Model.Movie.DirectorName
+                    </a>
+                }
+                else if (!string.IsNullOrEmpty(Model.Movie.DirectorName))
+                {
+                    <span>@Model.Movie.DirectorName</span>
+                }
+                else
+                {
+                    <span class="text-muted">Bilinmiyor</span>
+                }
+            </div>
+
+            <div class="mb-3">
+                <strong class="d-block text-primary"><i class="bi bi-people-fill me-1"></i> Başrol Oyuncuları:</strong>
+                @if (Model.Movie.TopCastMembers(5).Any()) // İlk 5 oyuncu örneği
+                {
+                    <ul class="list-unstyled list-inline">
+                        @foreach (var actor in Model.Movie.TopCastMembers(5))
+                        {
+                            <li class="list-inline-item border rounded px-2 py-1 mb-1 bg-light">
+                                <a asp-controller="People" asp-action="Details" asp-route-id="@actor.Id" class="text-decoration-none text-dark">
+                                    @actor.Name
+                                </a>
+                                @if (!string.IsNullOrEmpty(actor.Character))
+                                {
+                                    <small class="text-muted"> (@actor.Character)</small>
+                                }
+                            </li>
+                        }
+                        @if (Model.Movie.CastMembers.Count > 5)
+                        {
+                            <li class="list-inline-item"><small class="text-muted ms-1">(ve diğerleri...)</small></li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <span class="text-muted">Oyuncu bilgisi bulunamadı.</span>
+                }
+            </div>
+
+
+            <div class="mt-4">
+                <h5 class="text-primary"><i class="bi bi-text-left me-1"></i> Özet</h5>
+                @if (!string.IsNullOrEmpty(Model.Movie.Overview))
+                {
+                    <p style="text-align: justify;">@Model.Movie.Overview</p>
+                }
+                else
+                {
+                    <p>...</p>
+                }
+            </div>
+        </div>
+    </div>
+
+
+    <hr class="mt-5 mb-4"> 
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <h3 class="mb-4"><i class="bi bi-chat-square-text me-2"></i>Yorumlar (@Model.Reviews.Count)</h3>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    Yorumunuzu Ekleyin
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddReview" asp-controller="Movies" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        
+                        <input type="hidden" asp-for="NewReview.MovieId" value="@Model.Movie.Id" />
+
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NewReview.UserName" class="form-label"></label>
+                                <input asp-for="NewReview.UserName" class="form-control" placeholder="Rumuzunuzu girin..." />
+                                <span asp-validation-for="NewReview.UserName" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NewReview.Rating" class="form-label"></label>
+                                <select asp-for="NewReview.Rating" class="form-select">
+                                    <option value="">-- Puan Seçin --</option>
+                                    @for (int i = 10; i >= 1; i--)
+                                    {
+                                        <option value="@i">@i Yıldız</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="NewReview.Rating" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="NewReview.CommentText" class="form-label"></label>
+                            <textarea asp-for="NewReview.CommentText" class="form-control" rows="3" placeholder="Film hakkındaki düşünceleriniz..."></textarea>
+                            <span asp-validation-for="NewReview.CommentText" class="text-danger small"></span>
+                        </div>
+
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary">Yorumu Gönder</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            @if (Model.Reviews.Any())
+            {
+                <div class="list-group">
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <div class="list-group-item list-group-item-action flex-column align-items-start mb-2 shadow-sm border-start-0 border-end-0">
+                            <div class="d-flex w-100 justify-content-between">
+                                <div>
+                                    <h5 class="mb-1 fs-6">
+                                        <i class="bi bi-person-circle me-1"></i>@review.Username
+                                    </h5>
+                                    <small class="text-warning">
+                                        @for (int i = 0; i < review.Rating; i++)
+                                        {
+                                            <i class="bi bi-star-fill"></i>
+                                        }
+                                        @for (int i = review.Rating; i < 10; i++)
+                                        {
+                                            <i class="bi bi-star"></i>
+                                        }
+                                    </small>
+                                    <span class="ms-1">(@review.Rating/10)</span>
+                                </div>
+                                <small class="text-muted" title="@review.CreatedAt.ToString("F")">@review.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                            </div>
+                            @if (!string.IsNullOrEmpty(review.CommentText))
+                            {
+                                <p class="mb-1 mt-2">@review.CommentText</p>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else 
+            {
+                <div class="alert alert-light text-center" role="alert">
+                    Bu film için henüz yorum yapılmamış. İlk yorumu siz yapın!
+                </div>
+            }
+            @section Scripts {
+                @{
+                    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+                }
+
+                <script>
+                    // Bootstrap Tooltip'leri etkinleştir (varsa)
+                    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                        return new bootstrap.Tooltip(tooltipTriggerEl);
+                    });
+
+                    const favoriteButton = document.querySelector('.favorite-button'); 
+                    if (favoriteButton) {
+                        const buttonTextSpan = favoriteButton.querySelector('.button-text'); 
+                        const isAlreadyFavorite = favoriteButton.querySelector('.bi-heart-fill') !== null; 
+                        const originalText = buttonTextSpan ? buttonTextSpan.textContent : ''; 
+                        const hoverText = isAlreadyFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'; 
+                        const removeText = 'Favorilerden Çıkar'; 
+
+                        favoriteButton.addEventListener('mouseenter', () => {
+                            if (buttonTextSpan) {
+                                if(isAlreadyFavorite) {
+                                     buttonTextSpan.textContent = removeText;
+                                }
+                            }
+                        });
+
+                        favoriteButton.addEventListener('mouseleave', () => {
+                            if (buttonTextSpan) {
+                                buttonTextSpan.textContent = originalText; 
+                            }
+                        });
+                    }
+                </script>
+            }}

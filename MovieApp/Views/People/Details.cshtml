@@ -1,0 +1,305 @@
+﻿@model MovieApp.Models.People.PersonDetail
+@{
+    ViewData["Title"] = Model.Name ?? "Kişi Detayı";
+}
+
+<div class="container mt-4 person-details">
+
+    <div class="row mb-4">
+        <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
+            @if (!string.IsNullOrEmpty(Model.FullProfilePath))
+            {
+                <img src="@Model.FullProfilePath" class="img-fluid rounded shadow-lg" alt="@Model.Name Profil Resmi">
+            }
+            else
+            {
+                <div class="img-fluid rounded shadow-lg d-flex align-items-center justify-content-center bg-light text-secondary" style="min-height: 400px;">
+                    <i class="bi bi-person-bounding-box fs-1"></i>
+                </div>
+            }
+        </div>
+
+        <div class="col-md-8">
+            <h1 class="display-4 fw-bold mb-1">@Model.Name</h1>
+
+            @if (!string.IsNullOrEmpty(Model.KnownForDepartment))
+            {
+                <p class="lead text-primary mb-3">(@(Model.KnownForDepartment == "Acting" ? "Oyuncu" : Model.KnownForDepartment == "Directing" ? "Yönetmen" : Model.KnownForDepartment == "Writing" ? "Yazar" : Model.KnownForDepartment == "Production" ? "Yapımcı" : Model.KnownForDepartment))</p>
+            }
+            <hr>
+            <div class="row mb-3">
+                @if (!string.IsNullOrEmpty(Model.FormattedBirthday) || !string.IsNullOrEmpty(Model.PlaceOfBirth))
+                {
+                    <div class="col-sm-6 mb-2 mb-sm-0">
+                        @if (!string.IsNullOrEmpty(Model.FormattedBirthday))
+                        {
+                            <div><strong class="d-inline-block me-2" style="width: 100px;"><i class="bi bi-cake2 me-1"></i>Doğum:</strong> @Model.FormattedBirthday</div>
+                        }
+                        @if (Model.Age.HasValue)
+                        {
+                            <div><strong class="d-inline-block me-2" style="width: 100px;"><i class="bi bi-calendar-event me-1"></i>Yaş:</strong> @Model.AgeString</div>
+                        }
+                    </div>
+                    <div class="col-sm-6">
+                        @if (!string.IsNullOrEmpty(Model.PlaceOfBirth))
+                        {
+                            <div><strong class="d-inline-block me-2" style="width: 100px;"><i class="bi bi-geo-alt me-1"></i>Doğum Yeri:</strong> @Model.PlaceOfBirth</div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="col"><p class="text-muted fst-italic">Doğum bilgisi yok.</p></div>
+                }
+            </div>
+
+            <h5 class="mt-4 mb-2"><i class="bi bi-info-circle me-1"></i> Biyografi</h5>
+            @if (!string.IsNullOrEmpty(Model.Biography))
+            {
+                <p style="text-align: justify; max-height: 300px; overflow-y: auto;">@Model.Biography</p>
+            }
+            else
+            {
+                <p class="text-muted fst-italic">Biyografi bilgisi bulunmamaktadır.</p>
+            }
+        </div>
+    </div>
+
+    @if (Model.DirectedMovies.Any())
+    {
+        <section id="directed-filmography" class="mt-5">
+            <h3 class="mb-3"><i class="bi bi-camera-reels me-2"></i>Yönettiği Filmler (@Model.DirectedMovies.Count)</h3>
+            <div class="filmography-slider-container position-relative directed-slider">
+                <div class="filmography-scroll-wrapper">
+                    <div class="filmography-list d-flex flex-nowrap pb-2">
+                        @foreach (var credit in Model.DirectedMovies)
+                        {
+                            <div class="card movie-credit-card shadow-sm me-3 flex-shrink-0">
+                                <a asp-controller="Movies" asp-action="Details" asp-route-id="@credit.Id" class="text-decoration-none">
+                                    <div class="movie-poster-container">
+                                        @if (!string.IsNullOrEmpty(credit.FullPosterPath))
+                                        {
+                                            <img src="@credit.FullPosterPath" class="card-img-top" alt="@credit.Title Film Afişi" style="height: 240px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-secondary" style="height: 240px;"><i class="bi bi-camera-reels fs-3"></i></div>
+                                        }
+                                    </div>
+                                </a>
+                                <div class="card-body p-2 d-flex flex-column">
+                                    <h6 class="card-title fs-sm fw-bold mb-1 text-truncate" title="@credit.Title">
+                                        <a asp-controller="Movies" asp-action="Details" asp-route-id="@credit.Id" class="text-dark text-decoration-none stretched-link">@credit.Title</a>
+                                    </h6>
+                                    <small class="text-muted mb-1 mt-auto pt-1">(@credit.ReleaseYear)</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <button class="btn btn-dark btn-sm slider-arrow prev-arrow position-absolute top-50 translate-middle-y start-0 d-none" type="button" aria-label="Önceki"><i class="bi bi-chevron-left"></i></button>
+                <button class="btn btn-dark btn-sm slider-arrow next-arrow position-absolute top-50 translate-middle-y end-0 d-none" type="button" aria-label="Sonraki"><i class="bi bi-chevron-right"></i></button>
+            </div>
+        </section>
+    }
+
+    @if (Model.SortedMovieCredits.Any())
+    {
+        <section id="acting-filmography" class="mt-5">
+            <h3 class="mb-3"><i class="bi bi-person-square me-2"></i>Oynadığı Filmler (@Model.SortedMovieCredits.Count)</h3>
+            <div class="filmography-slider-container position-relative acting-slider">
+                <div class="filmography-scroll-wrapper">
+                    <div class="filmography-list d-flex flex-nowrap pb-2">
+                        @foreach (var credit in Model.SortedMovieCredits)
+                        {
+                            <div class="card movie-credit-card shadow-sm me-3 flex-shrink-0">
+                                <a asp-controller="Movies" asp-action="Details" asp-route-id="@credit.Id" class="text-decoration-none">
+                                    <div class="movie-poster-container">
+                                        @if (!string.IsNullOrEmpty(credit.FullPosterPath))
+                                        {
+                                            <img src="@credit.FullPosterPath" class="card-img-top" alt="@credit.Title Film Afişi" style="height: 240px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-secondary" style="height: 240px;"><i class="bi bi-camera-reels fs-3"></i></div>
+                                        }
+                                    </div>
+                                </a>
+                                <div class="card-body p-2 d-flex flex-column">
+                                    <h6 class="card-title fs-sm fw-bold mb-1 text-truncate" title="@credit.Title">
+                                        <a asp-controller="Movies" asp-action="Details" asp-route-id="@credit.Id" class="text-dark text-decoration-none stretched-link">@credit.Title</a>
+                                    </h6>
+                                    <small class="text-muted mb-1">(@credit.ReleaseYear)</small>
+                                    @if (!string.IsNullOrEmpty(credit.Character))
+                                    {
+                                        <small class="card-text text-muted fst-italic mt-auto pt-1 text-truncate" title="Rolü">Rol: @credit.Character</small>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <button class="btn btn-dark btn-sm slider-arrow prev-arrow position-absolute top-50 translate-middle-y start-0 d-none" type="button" aria-label="Önceki"><i class="bi bi-chevron-left"></i></button>
+                <button class="btn btn-dark btn-sm slider-arrow next-arrow position-absolute top-50 translate-middle-y end-0 d-none" type="button" aria-label="Sonraki"><i class="bi bi-chevron-right"></i></button>
+            </div>
+        </section>
+    }
+
+    @if (!Model.DirectedMovies.Any() && !Model.SortedMovieCredits.Any())
+    {
+        <div class="alert alert-light mt-4" role="alert">
+            Bu kişinin bilinen filmografisi bulunmamaktadır.
+        </div>
+    }
+
+</div> 
+
+@* === CSS Stilleri === *@
+@section Styles {
+    <style>
+        .person-details h1 {
+            line-height: 1.2;
+        }
+
+        .filmography-slider-container {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .filmography-scroll-wrapper {
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding-left: 45px;
+            padding-right: 45px;
+            box-sizing: border-box;
+            scroll-padding-left: 15px;
+            scroll-padding-right: 15px;
+        }
+
+            .filmography-scroll-wrapper::-webkit-scrollbar {
+                display: none;
+            }
+
+        .filmography-list {
+            align-items: stretch;
+            padding-bottom: 5px;
+        }
+
+        .movie-credit-card {
+            width: 160px;
+            flex-shrink: 0;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid rgba(0,0,0,.08);
+            margin-right: 16px;
+        }
+
+            .movie-credit-card:last-child {
+                margin-right: 0;
+            }
+
+            .movie-credit-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+            }
+
+            .movie-credit-card .card-img-top {
+                object-fit: cover;
+                border-top-left-radius: var(--bs-card-inner-border-radius);
+                border-top-right-radius: var(--bs-card-inner-border-radius);
+                display: block;
+                height: 240px; 
+                width: 100%; 
+            }
+
+            .movie-credit-card .card-body {
+                font-size: 0.8rem;
+            }
+
+            .movie-credit-card .card-title {
+                font-size: 0.85rem;
+            }
+
+                .movie-credit-card .card-title a:hover {
+                    text-decoration: underline;
+                }
+
+        .slider-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            padding: 0;
+            line-height: 35px;
+            text-align: center;
+        }
+
+            .slider-arrow:hover {
+                opacity: 0.9;
+                background-color: rgba(0, 0, 0, 0.7);
+            }
+
+            .slider-arrow.disabled {
+                opacity: 0.2;
+                cursor: not-allowed;
+                background-color: rgba(0, 0, 0, 0.3);
+            }
+
+            .slider-arrow.prev-arrow {
+                left: 5px;
+            }
+
+            .slider-arrow.next-arrow {
+                right: 5px;
+            }
+    </style>
+}
+
+@* === JavaScript Kodu === *@
+@section Scripts {
+    <script>
+        function initializeSlider(containerSelector) {
+             const container = document.querySelector(containerSelector); if (!container) { /* console.log(`Slider container not found: ${containerSelector}`); */ return; }
+             const wrapper = container.querySelector('.filmography-scroll-wrapper'); const list = container.querySelector('.filmography-list');
+             const prevArrow = container.querySelector('.prev-arrow'); const nextArrow = container.querySelector('.next-arrow');
+             const cards = list.querySelectorAll('.movie-credit-card');
+             if (!wrapper || !list || !prevArrow || !nextArrow || cards.length === 0) { if(prevArrow) prevArrow.classList.add('d-none'); if(nextArrow) nextArrow.classList.add('d-none'); return; }
+
+             let cardWidth = 0; let cardMargin = 0; let scrollAmount = 0;
+
+             function calculateDimensions() {
+                 const firstCard = cards[0]; if (!firstCard) return; const cardStyle = window.getComputedStyle(firstCard);
+                 cardWidth = firstCard.offsetWidth; cardMargin = parseFloat(cardStyle.marginRight);
+                 if (isNaN(cardMargin) || cardMargin < 1) { if(cards.length > 1) { const card1Right = firstCard.getBoundingClientRect().right; const card2Left = cards[1].getBoundingClientRect().left; cardMargin = Math.max(0, card2Left - card1Right); } else { cardMargin = 0; } } // Negatif olmayan margin
+                 scrollAmount = cardWidth + cardMargin;
+                 // console.log(`${containerSelector} - CW: ${cardWidth}, M: ${cardMargin}, SA: ${scrollAmount}`); // Debug
+                 updateArrows();
+             }
+             function updateArrows() {
+                 const tolerance = 10; if (!wrapper || !list) return;
+                 const canScroll = list.scrollWidth > wrapper.clientWidth + tolerance;
+                 prevArrow.classList.toggle('d-none', !canScroll); nextArrow.classList.toggle('d-none', !canScroll);
+                 if (!canScroll) return;
+                 prevArrow.disabled = wrapper.scrollLeft <= tolerance; prevArrow.classList.toggle('disabled', prevArrow.disabled);
+                 nextArrow.disabled = wrapper.scrollLeft + wrapper.clientWidth >= list.scrollWidth - tolerance; nextArrow.classList.toggle('disabled', nextArrow.disabled);
+                 // console.log(`${containerSelector} - SL: ${wrapper.scrollLeft}, SW: ${list.scrollWidth}, CW: ${wrapper.clientWidth}, PrevD: ${prevArrow.disabled}, NextD: ${nextArrow.disabled}`); // Debug
+             }
+             prevArrow.addEventListener('click', () => { if (!prevArrow.disabled) wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); });
+             nextArrow.addEventListener('click', () => { if (!nextArrow.disabled) wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' }); });
+             let scrollTimer; wrapper.addEventListener('scroll', () => { clearTimeout(scrollTimer); scrollTimer = setTimeout(updateArrows, 150); });
+             calculateDimensions(); window.addEventListener('resize', calculateDimensions); setTimeout(calculateDimensions, 300);
+        }
+        document.addEventListener('DOMContentLoaded', () => { initializeSlider('.directed-slider'); initializeSlider('.acting-slider'); });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

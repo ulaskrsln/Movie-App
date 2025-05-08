@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Movie BlogApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg  border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-film me-2"></i> 
+                    Movie BlogApp
+                </a>
+                <button class="btn btn-outline-light btn-sm me-auto ms-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#genreOffcanvas" aria-controls="genreOffcanvas">
+                    <i class="bi bi-list"></i> Kategoriler 
+                </button>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                    <ul class="navbar-nav">
+
+                        <li class="nav-item">
+                            <a class="nav-link text-light mx-2" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door me-1"></i>Ana Sayfa
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-light mx-2" asp-controller="Home" asp-action="Bests">
+                                <i class="bi bi-trophy me-1"></i>Top 250
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-light mx-2" asp-controller="People" asp-action="Index">
+                                <i class="bi bi-person me-1"></i> Popüler Aktörler
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-light mx-2" asp-controller="Home" asp-action="About">
+                                <i class="bi bi-info-circle me-1"></i>Hakkında
+                            </a>
+                        </li>
+                  
+                    </ul>
+                </div>
+
+                <div class="navbar-collapse collapse justify-content-end" id="navbarLoginPartial">
+                    <partial name="_LoginPartial" />
+                </div>
+
+            </div>
+        </nav>
+    </header>
+    </div>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody() <!-- Sayfa içerikleri buraya gelecek -->
+        </main>
+ 
+
+    <footer class="border-top footer text-muted bg-light mt-auto py-3">
+        <div class="container text-center">
+            © @DateTime.Now.Year - MovieBlogApp - Geliştirici: Ulaş Karaaslan -
+            <a asp-controller="Home" asp-action="Privacy">Gizlilik Politikası</a>
+        </div>
+
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="genreOffcanvas" aria-labelledby="genreOffcanvasLabel">
+                <div class="offcanvas-header border-bottom">
+                    <h5 class="offcanvas-title" id="genreOffcanvasLabel">
+                        <i class="bi bi-tags-fill me-2"></i>Kategoriler
+                    </h5>
+                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body p-0">
+                    @await Component.InvokeAsync("GenreMenu")
+                </div>
+            </div>
+
+    </footer>
+
+        <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+            <div id="appToast" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                <div class="d-flex">
+                    <div class="toast-body">
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script> 
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+        @{
+            var successMessage = TempData["SuccessMessage"] as string;
+            var errorMessage = TempData["ErrorMessage"] as string;
+            var warningMessage = TempData["WarningMessage"] as string;
+            var infoMessage = TempData["InfoMessage"] as string; 
+        }
+        @if (!string.IsNullOrEmpty(successMessage) || !string.IsNullOrEmpty(errorMessage) || !string.IsNullOrEmpty(warningMessage) || !string.IsNullOrEmpty(infoMessage))
+        {
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const toastElement = document.getElementById('appToast'); 
+                    if (!toastElement) return; 
+
+                    const toastBody = toastElement.querySelector('.toast-body'); 
+                    if (!toastBody) return;
+
+                    let message = '';
+                    let toastClass = ''; // Arka plan rengi için class
+
+                    if (@Json.Serialize(successMessage) != null) {
+                        message = @Json.Serialize(successMessage);
+                        toastClass = 'text-bg-success'; // Yeşil arka plan (Bootstrap 5.2+)
+                    } else if (@Json.Serialize(errorMessage) != null) {
+                        message = @Json.Serialize(errorMessage);
+                        toastClass = 'text-bg-danger';
+                    } else if (@Json.Serialize(warningMessage) != null) {
+                        message = @Json.Serialize(warningMessage);
+                        toastClass = 'text-bg-warning';
+                    } else if (@Json.Serialize(infoMessage) != null) {
+                        message = @Json.Serialize(infoMessage);
+                        toastClass = 'text-bg-info';
+                    }
+
+                    if (message && toastBody) {
+                        toastBody.textContent = message; 
+
+                        
+                        toastElement.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-info', 'bg-success', 'bg-danger', 'bg-warning', 'bg-info');
+
+                        if (toastClass) {
+                            toastElement.classList.add(toastClass);
+                        }
+
+                        const toast = new bootstrap.Toast(toastElement);
+                        toast.show();
+                    }
+                });
+            </script>
+        }
+</body>
+</html>

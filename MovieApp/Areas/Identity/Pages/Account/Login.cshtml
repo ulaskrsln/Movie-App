@@ -1,0 +1,76 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Giriş Yap";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-header text-center login-card-header">
+                    <h1>@ViewData["Title"]</h1>
+                </div>
+                <div class="card-body">
+                    <section>
+                        <form id="account" method="post">
+                            @Html.AntiForgeryToken()
+                            <h2 class="text-center h4 mb-3 fw-normal">Hesabınıza giriş yapın.</h2>
+                            <hr />
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.Username" class="form-control" autocomplete="username" required placeholder="Kullanıcı Adınız" />
+                                <label asp-for="Input.Username" class="form-label"></label>
+                                <span asp-validation-for="Input.Username" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.Password" type="password" class="form-control" autocomplete="current-password" required placeholder="Parolanız" />
+                                <label asp-for="Input.Password" class="form-label"></label>
+                                <span asp-validation-for="Input.Password" class="text-danger"></span>
+                            </div>
+
+                            <div class="checkbox mb-3">
+                                <label asp-for="Input.RememberMe" class="form-label">
+                                    <input class="form-check-input" asp-for="Input.RememberMe" />
+                                    @Html.DisplayNameFor(m => m.Input.RememberMe)
+                                </label>
+                            </div>
+
+                            <div>
+                                <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Giriş Yap</button>
+                            </div>
+
+                            <div class="mt-3 text-center">
+                                <p>
+                                    <a id="forgot-password" asp-page="./ForgotPassword">Parolanızı mı unuttunuz?</a>
+                                </p>
+                                <p>
+                                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Yeni hesap oluştur</a>
+                                </p>
+                               
+                            </div>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+ @section Styles {
+    <partial name="_ValidationScriptsPartial" /> 
+    <style>
+        .login-card-header {
+            background-color: #16325c;
+            color: white; 
+        }
+        
+    </style>
+}
